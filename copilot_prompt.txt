@@ -1,0 +1,33 @@
+@copilot Rebuild this repository using the source files in raw_upload/.
+
+Read and follow raw_upload/repo_task.md exactly.
+
+Use:
+- raw_upload/README_source.md as the complete content for README.md
+- raw_upload/theory_source.md as the complete content for docs/theory.md
+- raw_upload/numerical_method_source.md as the complete content for docs/numerical_method.md
+- raw_upload/results_source.md as the complete content for docs/results_summary.md
+- raw_upload/sources_and_notes_source.md as the complete content for docs/sources_and_notes.md
+- raw_upload/figure_manifest.md to move, rename and link all figures
+
+Create or update:
+- README.md
+- requirements.txt
+- .gitignore
+- docs/theory.md
+- docs/numerical_method.md
+- docs/results_summary.md
+- docs/sources_and_notes.md
+
+Organize the Python code into src/ and the figures into figures/ exactly as described in raw_upload/repo_task.md and raw_upload/figure_manifest.md.
+
+Do not summarize the source files.
+Do not rewrite the theory.
+Do not rewrite the results analysis.
+Do not invent figures.
+Do not invent results.
+Do not create broken image links.
+Do not change the numerical logic of the Python code.
+Do not change physical parameters.
+Do not provide only a plan.
+Apply the changes directly to the repository and create one clean commit.
