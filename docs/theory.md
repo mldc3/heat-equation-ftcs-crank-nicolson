@@ -1,14 +1,24 @@
 # Theory Background
 
-This document explains the physical and numerical theory behind the one-dimensional heat-equation simulations in this repository.
+This document develops the physical and numerical theory behind the one-dimensional heat-equation simulations in this repository. The goal is to explain the mathematical model, the physical interpretation, and the numerical methods in a way that is clearer and more complete than a short classroom derivation.
+
+The practice studies a parabolic partial differential equation: the heat equation. It compares explicit and implicit finite-difference time integration, constant and spatially variable diffusion, stability restrictions, conservative discretization, numerical error, and computational cost.
 
 ---
 
-## 1. Physical meaning of the heat equation
+## 1. Physical meaning of diffusion
 
-The heat equation describes the time evolution of a scalar field that spreads through space. In this project the scalar field is the temperature $T(x,t)$, but the same equation also appears in diffusion of particles, concentration fields, probability densities and relaxation processes.
+Diffusion is the process by which a quantity spreads from regions of high concentration or high temperature toward regions of lower concentration or temperature. In this project the evolving scalar field is the temperature $T(x,t)$, but the same mathematical structure appears in heat conduction, particle diffusion, chemical concentration, probability spreading and smoothing processes.
 
-In one spatial dimension, the constant-diffusion heat equation is:
+The essential physical feature of diffusion is that gradients are reduced over time. If the initial temperature has a sharp peak, the peak gradually becomes lower and wider. Heat does not move as a wave with a fixed propagation speed. Instead, the temperature field relaxes by smoothing spatial variations.
+
+This behaviour is very different from hyperbolic equations such as the wave equation or the advection equation. Hyperbolic equations transport information with finite-speed characteristics. Parabolic equations such as the heat equation are dissipative: they remove sharp structures and damp high-frequency spatial components.
+
+---
+
+## 2. The one-dimensional heat equation
+
+For constant diffusion coefficient, the one-dimensional heat equation is:
 
 $$
 \frac{\partial T}{\partial t}
@@ -17,31 +27,39 @@ D
 \frac{\partial^2 T}{\partial x^2}.
 $$
 
-Here $D$ is the diffusion coefficient. A large value of $D$ means that temperature gradients are smoothed quickly. A small value of $D$ means that the initial profile relaxes more slowly.
+Here $T(x,t)$ is the temperature field, $x$ is the spatial coordinate, $t$ is time and $D$ is the diffusion coefficient.
 
-The equation is parabolic. This means that it is time-dependent and dissipative. Unlike a wave equation, it does not transport a disturbance at a fixed velocity. Instead, it smooths gradients. Sharp peaks become wider and lower as time evolves.
+The parameter $D$ determines how quickly heat spreads. If $D$ is large, temperature gradients are smoothed quickly. If $D$ is small, the profile evolves more slowly.
+
+The right-hand side contains the second spatial derivative. This is important physically. The second derivative measures curvature. A point where the temperature profile is curved downward, such as the top of a peak, tends to decrease. A point where the profile is curved upward tends to increase. This is how the equation redistributes temperature and smooths the profile.
+
+The heat equation is parabolic. This classification matters because parabolic equations are strongly connected to stability restrictions in explicit numerical schemes. In particular, the stable timestep for a simple explicit method scales as $\Delta x^2$, not as $\Delta x$. This makes explicit heat-equation simulations increasingly expensive when the grid is refined.
 
 ---
 
-## 2. Conservation law and Fourier law
+## 3. Conservation law and heat flux
 
-The heat equation can be derived from a local conservation law. If heat is neither created nor destroyed inside the domain, the change of temperature in a small region must be explained by the net heat flux entering or leaving that region.
+The heat equation can be understood from two physical principles: local conservation and Fourier's law.
 
-The local conservation form is:
+A local conservation law states that the amount of heat inside a small interval can only change because heat flows through the boundaries of that interval. In one dimension this can be written as:
 
 $$
 \frac{\partial T}{\partial t}
 +
 \frac{\partial J}{\partial x}
 =
-0.
+0,
 $$
 
-The quantity $J$ is the heat flux. Fourier's law states that heat flows from hot regions to cold regions:
+where $J(x,t)$ is the heat flux.
+
+The flux $J$ measures the amount of heat crossing a point per unit time. Fourier's law states that heat flows from hot regions to cold regions:
 
 $$
 J=-D\frac{\partial T}{\partial x}.
 $$
+
+The minus sign is physically important. If temperature increases with $x$, then $\partial T/\partial x>0$, so the heat flux is negative, meaning heat flows toward smaller $x$. In other words, heat flows opposite to the temperature gradient.
 
 Substituting Fourier's law into the conservation equation gives:
 
@@ -54,7 +72,7 @@ D\frac{\partial T}{\partial x}
 \right).
 $$
 
-If $D$ is constant, this reduces to:
+If $D$ is constant, then $D$ can be taken outside the derivative:
 
 $$
 \frac{\partial T}{\partial t}
@@ -63,68 +81,87 @@ D
 \frac{\partial^2 T}{\partial x^2}.
 $$
 
-This derivation is important because it shows that the physically correct equation is naturally written in conservative flux form. This becomes essential when $D$ depends on position.
+This derivation is crucial because it shows that the physically fundamental form of diffusion is a flux-divergence equation. That becomes especially important when the diffusion coefficient varies in space.
 
 ---
 
-## 3. Constant diffusion versus variable diffusion
+## 4. Constant diffusion and variable diffusion
 
-For constant $D$, the diffusion coefficient can be taken outside the spatial derivative:
+When $D$ is constant, the heat equation is:
 
 $$
-\frac{\partial}{\partial x}
-\left(
-D\frac{\partial T}{\partial x}
-\right)
+\frac{\partial T}{\partial t}
 =
 D
 \frac{\partial^2 T}{\partial x^2}.
 $$
 
-For spatially variable diffusion $D(x)$, this simplification is not valid. The correct equation is:
+This is the simplest model. Every point in the material conducts heat equally. The same temperature gradient produces the same flux everywhere.
+
+However, real materials may not be homogeneous. The thermal diffusivity may depend on position. In that case, the diffusion coefficient is written as $D(x)$, and the correct equation is:
 
 $$
 \frac{\partial T}{\partial t}
 =
 \frac{\partial}{\partial x}
 \left(
-D(x)\frac{\partial T}{\partial x}
+D(x)
+\frac{\partial T}{\partial x}
 \right).
 $$
 
-Expanding the derivative gives:
+This is not the same as simply writing:
 
 $$
 \frac{\partial T}{\partial t}
 =
 D(x)
+\frac{\partial^2 T}{\partial x^2}.
+$$
+
+To see the difference, expand the derivative:
+
+$$
+\begin{aligned}
+\frac{\partial}{\partial x}
+\left(
+D(x)
+\frac{\partial T}{\partial x}
+\right)
+&=
+D(x)
 \frac{\partial^2 T}{\partial x^2}
 +
 \frac{dD}{dx}
 \frac{\partial T}{\partial x}.
+\end{aligned}
 $$
 
-Therefore, replacing the constant coefficient $D$ by a diagonal matrix $D(x)$ multiplying the usual Laplacian is only an approximation. It ignores the additional gradient term. This is why the repository distinguishes between a first non-conservative variable-diffusion attempt and a corrected conservative discretization.
+The extra term involving $dD/dx$ is missing if one simply multiplies the Laplacian by $D(x)$. This is why the practice distinguishes between a first non-conservative variable-diffusion attempt and the corrected conservative discretization.
+
+The conservative form is physically preferable because it describes fluxes through interfaces between neighbouring cells. When diffusivity changes in space, heat flux depends not only on the local temperature curvature but also on how the material property changes from one region to another.
 
 ---
 
-## 4. Initial and boundary conditions
+## 5. Initial condition
 
-The simulations use a one-dimensional spatial domain:
-
-$$
-x\in[-1,1].
-$$
-
-The initial temperature profile is a localized Gaussian peak:
+The simulations use a localized Gaussian initial condition:
 
 $$
 T(x,0)=100e^{-20x^2}.
 $$
 
-This profile is high near the centre and small near the boundaries. It is a good test because it allows the simulation to show the expected diffusion process clearly: the central peak decreases while heat spreads toward neighbouring points.
+This profile is useful because it is smooth, has a clear maximum at the centre, decays toward the boundaries and makes the diffusion process visually obvious.
 
-The main boundary conditions are homogeneous Dirichlet conditions:
+At $t=0$, most of the heat is concentrated near $x=0$. As time evolves, the central peak decreases and the temperature spreads outward. This is the expected physical behaviour of the heat equation.
+
+The Gaussian is also numerically convenient. Unlike a discontinuous initial condition, it does not introduce artificial jumps at the beginning of the simulation. This makes it easier to focus on diffusion, stability and the behaviour of the time integration schemes.
+
+---
+
+## 6. Boundary conditions
+
+The simulations use homogeneous Dirichlet boundary conditions:
 
 $$
 T(-1,t)=0,
@@ -132,31 +169,31 @@ T(-1,t)=0,
 T(1,t)=0.
 $$
 
-These conditions represent boundaries held at zero temperature. Physically, the boundaries act as thermal reservoirs that absorb heat. Numerically, these values must be imposed at every time step; otherwise, the boundary values can drift due to roundoff or matrix operations.
+Physically, these boundaries can be interpreted as fixed-temperature reservoirs held at zero temperature. Heat reaching the boundaries can be absorbed by the reservoirs.
+
+Numerically, boundary conditions must be imposed carefully. If the boundary values are not fixed after every update, they can drift due to matrix operations or roundoff errors. This would change the physical problem being solved.
+
+Dirichlet boundaries also affect the long-time behaviour. Because the boundaries are held at zero, the temperature profile eventually decays toward zero throughout the domain. Heat is not conserved inside the finite domain; it can leave through the boundaries.
+
+This is different from insulated Neumann boundaries, where the derivative would be set to zero and heat would remain in the system. Therefore, boundary conditions are not just numerical details. They define the physical model.
 
 ---
 
-## 5. Spatial discretization
+## 7. Spatial discretization
 
-The continuous domain is replaced by a uniform grid:
+The continuous spatial interval is replaced by a finite grid:
 
 $$
 x_j=x_{\min}+j\Delta x.
 $$
 
-The temperature field becomes a vector:
+The temperature at each grid point and time level is written as:
 
 $$
-\mathbf{T}^n=
-\left(
-T_0^n,
-T_1^n,
-\ldots,
-T_{N-1}^n
-\right)^T.
+T_j^n \approx T(x_j,t^n).
 $$
 
-The second derivative is approximated by the centred finite-difference stencil:
+The second derivative is approximated using the centered finite-difference stencil:
 
 $$
 \frac{\partial^2 T}{\partial x^2}
@@ -171,9 +208,9 @@ T_{j-1}^n
 }{\Delta x^2}.
 $$
 
-This stencil is second order in space. It is local: each grid point is coupled only to its two nearest neighbours. In matrix form, this produces a tridiagonal discrete Laplacian.
+This formula is second-order accurate in space. It uses only the nearest neighbours of each point. That locality is the reason the discrete Laplacian matrix is tridiagonal.
 
-The discrete Laplacian has the structure:
+In matrix form, the second derivative operator can be written as:
 
 $$
 L=
@@ -187,15 +224,35 @@ L=
 \end{pmatrix}.
 $$
 
-This matrix representation is useful because the whole time evolution can be written compactly using linear algebra.
+The matrix is sparse because almost all entries are zero. Sparse matrices are useful for computational physics because they allow large systems to be stored and manipulated efficiently.
 
 ---
 
-## 6. FTCS explicit method
+## 8. FTCS explicit method
 
-FTCS means Forward Time, Centered Space. The time derivative is approximated with a forward difference, while the spatial derivative uses the centred second-derivative stencil.
+FTCS stands for Forward Time, Centered Space. The time derivative is approximated with a forward difference:
 
-The method is:
+$$
+\frac{\partial T}{\partial t}
+\approx
+\frac{T_j^{n+1}-T_j^n}{\Delta t}.
+$$
+
+The spatial derivative is approximated with the centered second-derivative stencil:
+
+$$
+\frac{\partial^2 T}{\partial x^2}
+\approx
+\frac{
+T_{j+1}^n
+-
+2T_j^n
++
+T_{j-1}^n
+}{\Delta x^2}.
+$$
+
+Substituting into the heat equation gives:
 
 $$
 \frac{T_j^{n+1}-T_j^n}{\Delta t}
@@ -210,7 +267,7 @@ T_{j-1}^n
 }{\Delta x^2}.
 $$
 
-Solving for $T_j^{n+1}$ gives:
+Solving for the new temperature gives:
 
 $$
 \begin{aligned}
@@ -233,15 +290,27 @@ r
 \end{aligned}
 $$
 
-FTCS is explicit because the new value is computed only from known values at time level $n$. This makes the method simple and fast per step.
+The method is explicit because all quantities on the right-hand side are known at time level $n$. This makes each timestep cheap. No linear system must be solved.
 
-The disadvantage is stability. For the one-dimensional heat equation, FTCS is stable only if:
+The disadvantage is that explicit heat-equation schemes are conditionally stable. If $\Delta t$ is too large, the numerical solution develops nonphysical oscillations and can blow up.
+
+---
+
+## 9. FTCS stability condition
+
+For the one-dimensional heat equation, FTCS is stable only if:
 
 $$
 r\leq\frac{1}{2}.
 $$
 
-Equivalently:
+Since:
+
+$$
+r=\frac{D\Delta t}{\Delta x^2},
+$$
+
+the timestep must satisfy:
 
 $$
 \Delta t
@@ -249,66 +318,37 @@ $$
 \frac{\Delta x^2}{2D}.
 $$
 
-This condition becomes very restrictive when the grid is refined, because the allowed timestep scales as $\Delta x^2$.
+This condition has an important computational consequence. If the spatial grid is refined by making $\Delta x$ smaller, the timestep must decrease as $\Delta x^2$. Therefore, doubling the spatial resolution can require roughly four times more timesteps to reach the same final time.
+
+For variable diffusion, the most restrictive part of the domain is where $D(x)$ is largest. A safe condition is:
+
+$$
+\Delta t
+\leq
+\frac{\Delta x^2}{2\max(D(x))}.
+$$
+
+This explains why stronger diffusion makes explicit simulations more expensive: increasing $D$ forces a smaller stable timestep.
 
 ---
 
-## 7. Crank-Nicolson method
+## 10. Von Neumann stability analysis
 
-Crank-Nicolson averages the diffusion operator between the old time level $n$ and the new time level $n+1$. For constant diffusion, the scheme can be written as:
-
-$$
-\frac{T_j^{n+1}-T_j^n}{\Delta t}
-=
-\frac{D}{2}
-\left[
-\left(
-\frac{\partial^2 T}{\partial x^2}
-\right)_j^{n}
-+
-\left(
-\frac{\partial^2 T}{\partial x^2}
-\right)_j^{n+1}
-\right].
-$$
-
-In matrix form:
+Von Neumann analysis studies the evolution of Fourier modes under a numerical scheme. A discrete perturbation can be written as:
 
 $$
-\left(
-I-\frac{D\Delta t}{2}L
-\right)
-\mathbf{T}^{n+1}
-=
-\left(
-I+\frac{D\Delta t}{2}L
-\right)
-\mathbf{T}^{n}.
+T_j^n = Q^n e^{ikj\Delta x},
 $$
 
-The method is implicit because $\mathbf{T}^{n+1}$ appears inside a linear system. Therefore, each time step requires solving a matrix equation.
+where $Q$ is the amplification factor.
 
-Crank-Nicolson is more expensive per time step than FTCS, but it is much more stable. It is second order in time and is unconditionally stable for the linear heat equation. In practice, this means that the timestep can be chosen mainly from accuracy requirements rather than from a strict stability limit.
-
----
-
-## 8. Von Neumann stability analysis
-
-Von Neumann stability analysis studies how each Fourier mode evolves under a numerical scheme. A small numerical error can be decomposed into modes:
+A method is stable if all modes satisfy:
 
 $$
-T_j^n
-=
-Q^n e^{ikj\Delta x}.
+|Q|\leq1.
 $$
 
-The factor $Q$ is the amplification factor. Stability requires:
-
-$$
-|Q|\leq 1.
-$$
-
-For FTCS applied to the heat equation, substituting a Fourier mode gives:
+For FTCS applied to the heat equation, substitution gives:
 
 $$
 Q
@@ -322,15 +362,15 @@ Q
 \right).
 $$
 
-The worst case occurs for the highest-frequency mode represented by the grid. Enforcing $|Q|\leq1$ for all modes gives:
+The strongest restriction comes from the highest spatial frequencies, for which the sine term can reach 1. Requiring $|Q|\leq1$ gives:
 
 $$
 r\leq\frac{1}{2}.
 $$
 
-This explains why FTCS becomes unstable when $\Delta t$ is too large. The instability usually appears as point-to-point oscillations that grow instead of being smoothed.
+This analysis explains why numerical instability often appears as point-to-point oscillations. High-frequency modes are the first to become unstable.
 
-For Crank-Nicolson, the amplification factor is:
+For Crank-Nicolson, the amplification factor has the form:
 
 $$
 Q
@@ -354,24 +394,80 @@ Q
 }.
 $$
 
-This satisfies $|Q|\leq1$ for all positive $r$, explaining its unconditional stability.
+For positive $r$, the denominator is always larger in magnitude than the numerator, so $|Q|\leq1$. This is the origin of the unconditional stability of Crank-Nicolson for the linear heat equation.
 
 ---
 
-## 9. Conservative discretization for variable diffusion
+## 11. Crank-Nicolson method
 
-For variable diffusion, the physically correct form is:
+Crank-Nicolson is obtained by averaging the diffusion operator between the old and new time levels. Instead of evaluating the spatial derivative only at time $n$, it evaluates the average of the derivative at times $n$ and $n+1$.
+
+For constant diffusion:
+
+$$
+\frac{T_j^{n+1}-T_j^n}{\Delta t}
+=
+\frac{D}{2}
+\left[
+\left(
+\frac{\partial^2 T}{\partial x^2}
+\right)_j^n
++
+\left(
+\frac{\partial^2 T}{\partial x^2}
+\right)_j^{n+1}
+\right].
+$$
+
+In matrix form:
+
+$$
+\left(
+I-\frac{D\Delta t}{2}L
+\right)
+\mathbf{T}^{n+1}
+=
+\left(
+I+\frac{D\Delta t}{2}L
+\right)
+\mathbf{T}^{n}.
+$$
+
+This method is implicit because $\mathbf{T}^{n+1}$ appears inside a matrix equation. Each timestep requires solving a linear system.
+
+The advantages are second-order accuracy in time, unconditional stability for the linear heat equation, better behaviour for larger timesteps and suitability for longer simulations. The disadvantage is computational cost per timestep because solving a linear system is more expensive than applying an explicit update.
+
+---
+
+## 12. Explicit versus implicit trade-off
+
+FTCS and Crank-Nicolson represent two different numerical philosophies.
+
+FTCS is simple, direct and cheap per timestep. However, it is limited by a strict stability condition. It may require many small timesteps.
+
+Crank-Nicolson is more complex and expensive per timestep. However, it can use larger timesteps without becoming unstable. This makes it powerful for stiff diffusion problems or long-time simulations.
+
+The best method depends on the goal. If the grid is small and the final time is short, FTCS may be efficient. If the grid is fine, the diffusion coefficient is large, or the final time is long, Crank-Nicolson can be more practical despite the cost of solving linear systems.
+
+This is why the practice includes both runtime and error comparisons.
+
+---
+
+## 13. Conservative discretization for variable diffusion
+
+For spatially variable diffusion, the physically correct equation is:
 
 $$
 \frac{\partial T}{\partial t}
 =
 \frac{\partial}{\partial x}
 \left(
-D(x)\frac{\partial T}{\partial x}
+D(x)
+\frac{\partial T}{\partial x}
 \right).
 $$
 
-A conservative finite-difference discretization evaluates diffusion coefficients at cell interfaces:
+The conservative finite-difference approach discretizes heat fluxes at cell interfaces. Define:
 
 $$
 D_{j+1/2}
@@ -379,9 +475,30 @@ D_{j+1/2}
 \frac{D_j+D_{j+1}}{2}.
 $$
 
-The discrete operator becomes:
+The flux through the interface between $j$ and $j+1$ is approximated by:
 
 $$
+J_{j+1/2}
+=
+-
+D_{j+1/2}
+\frac{T_{j+1}-T_j}{\Delta x}.
+$$
+
+The divergence of the flux is then:
+
+$$
+-\frac{J_{j+1/2}-J_{j-1/2}}{\Delta x}.
+$$
+
+Substituting the flux approximation gives the conservative operator:
+
+$$
+\begin{aligned}
+\left(
+\nabla\cdot D\nabla T
+\right)_j
+&\approx
 \frac{1}{\Delta x^2}
 \left[
 D_{j+1/2}
@@ -394,22 +511,120 @@ D_{j-1/2}
 T_j-T_{j-1}
 \right)
 \right].
+\end{aligned}
 $$
 
-This form is better than simply multiplying the standard Laplacian by $D_j$, because it describes heat fluxes between neighbouring cells. It respects the conservation-law origin of the heat equation.
+This form is better than simply using $D_jL$ because it respects the flux balance between neighbouring cells. It is also more physically meaningful at material interfaces or in regions where diffusivity changes rapidly.
 
 ---
 
-## 10. Numerical interpretation
+## 14. Error analysis
 
-This project compares several important numerical ideas:
+Numerical methods are not judged only by whether they remain stable. A stable method can still be inaccurate.
 
-- explicit versus implicit time integration,
-- stability versus accuracy,
-- constant versus spatially variable diffusion,
-- non-conservative versus conservative discretization,
-- timestep restriction versus computational cost,
-- matrix-based implementation using sparse operators,
-- error behaviour as $\Delta t$ changes.
+The project compares numerical solutions obtained with different timesteps. A highly resolved solution, usually obtained with a small timestep, can be used as a reference. The error of coarser simulations is then measured relative to that reference.
 
-The main physical expectation is that temperature profiles should smooth over time. The main numerical challenge is to reproduce that smoothing without generating nonphysical oscillations, excessive artificial diffusion or unstable growth.
+The maximum error is:
+
+$$
+E_{\max}
+=
+\max_j
+\left|
+T_j^{\mathrm{num}}
+-
+T_j^{\mathrm{ref}}
+\right|.
+$$
+
+The mean error is:
+
+$$
+E_{\mathrm{mean}}
+=
+\frac{1}{N}
+\sum_j
+\left|
+T_j^{\mathrm{num}}
+-
+T_j^{\mathrm{ref}}
+\right|.
+$$
+
+The maximum error identifies the worst pointwise discrepancy. The mean error measures the global average discrepancy. Both are useful because a method may have a localized large error while remaining accurate on average, or it may have moderate error spread across the whole domain.
+
+---
+
+## 15. Runtime analysis
+
+Runtime analysis connects numerical methods to practical computation.
+
+FTCS has low cost per timestep:
+
+$$
+\mathbf{T}^{n+1}
+=
+\left(
+I+D\Delta t L
+\right)
+\mathbf{T}^{n}.
+$$
+
+This is essentially a matrix-vector update or a local stencil update.
+
+Crank-Nicolson requires solving:
+
+$$
+M_{\mathrm{left}}
+\mathbf{T}^{n+1}
+=
+\mathbf{b}.
+$$
+
+Solving this system is more expensive per timestep. However, Crank-Nicolson may need fewer timesteps because it is not limited by the explicit FTCS stability condition.
+
+Therefore, the runtime comparison is not trivial. The faster method depends on grid size, final time, timestep choice, implementation, and whether sparse matrix methods are used efficiently.
+
+---
+
+## 16. Diffusion-amplitude sweeps
+
+The practice studies variable diffusion of the form:
+
+$$
+D(x)=\alpha
+\left(
+1+e^{-x^2}
+\right).
+$$
+
+The parameter $\alpha$ controls the overall strength of diffusion. Increasing $\alpha$ increases $D(x)$ everywhere, especially near the centre where $e^{-x^2}$ is largest.
+
+Physically, larger $\alpha$ means faster smoothing. The Gaussian peak should flatten more rapidly, and the temperature should spread more strongly toward the boundaries.
+
+Numerically, increasing $\alpha$ also tightens the FTCS stability condition:
+
+$$
+\Delta t
+\leq
+\frac{\Delta x^2}{2\max(D(x))}.
+$$
+
+Thus the alpha sweep connects physics and computation: stronger diffusion produces faster physical relaxation but requires smaller explicit timesteps.
+
+---
+
+## 17. Main theoretical conclusions
+
+The key conclusions are:
+
+1. The heat equation is parabolic and dissipative.
+2. Diffusion smooths gradients and damps sharp spatial structures.
+3. FTCS is simple and explicit but conditionally stable.
+4. The FTCS stability limit scales as $\Delta x^2$.
+5. Crank-Nicolson is implicit, more expensive per timestep, but unconditionally stable for the linear heat equation.
+6. Stability does not automatically imply accuracy.
+7. Variable diffusion must be discretized in conservative flux form for physical consistency.
+8. Sparse matrices are natural because finite-difference operators are local.
+9. Runtime comparisons are essential because different schemes have different per-step cost and timestep restrictions.
+10. The numerical method must be chosen according to both the physics of the PDE and the computational cost.
