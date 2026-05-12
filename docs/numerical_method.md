@@ -56,8 +56,7 @@ $$
 \begin{aligned}
 T_j^{n+1} &= T_j^n +
 \frac{D\Delta t}{\Delta x^2}
-\left( T_{j+1}^n - 2T_j^n
-+
+\left( T_{j+1}^n - 2T_j^n +
 T_{j-1}^n
 \right).
 \end{aligned}
@@ -251,8 +250,7 @@ $$
 E_{\max} =
 \max_j
 \left|
-T_j^{\mathrm{num}}
--
+T_j^{\mathrm{num}} -
 T_j^{\mathrm{ref}}
 \right|.
 $$
