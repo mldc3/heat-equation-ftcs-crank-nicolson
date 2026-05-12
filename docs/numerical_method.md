@@ -27,9 +27,7 @@ $$
 After creating the initial profile, the boundary values are explicitly set to zero:
 
 $$
-T_0^n=0,
-\qquad
-T_{N-1}^n=0.
+T_0^n=0, \qquad T_{N-1}^n=0.
 $$
 
 These are homogeneous Dirichlet boundary conditions.
@@ -41,16 +39,7 @@ These are homogeneous Dirichlet boundary conditions.
 The second derivative is approximated by:
 
 $$
-\frac{\partial^2 T}{\partial x^2}
-\bigg|_{x_j}
-\approx
-\frac{
-T_{j+1}
--
-2T_j
-+
-T_{j-1}
-}{\Delta x^2}.
+\frac{\partial^2 T}{\partial x^2} \bigg|_{x_j} \approx \frac{ T_{j+1} - 2T_j + T_{j-1} }{\Delta x^2}.
 $$
 
 In the code, this operator is represented as a sparse tridiagonal matrix. The diagonal contains $-2$, and the upper and lower diagonals contain $1$.
@@ -65,15 +54,9 @@ For constant diffusion, the FTCS update is:
 
 $$
 \begin{aligned}
-T_j^{n+1}
-&=
-T_j^n
-+
+T_j^{n+1} &= T_j^n +
 \frac{D\Delta t}{\Delta x^2}
-\left(
-T_{j+1}^n
--
-2T_j^n
+\left( T_{j+1}^n - 2T_j^n
 +
 T_{j-1}^n
 \right).
@@ -83,20 +66,14 @@ $$
 The code writes this in matrix form as:
 
 $$
-\mathbf{T}^{n+1}
-=
-\mathbf{T}^{n}
-+
+\mathbf{T}^{n+1} = \mathbf{T}^{n} +
 D\Delta t L\mathbf{T}^{n}.
 $$
 
 Equivalently:
 
 $$
-\mathbf{T}^{n+1}
-=
-\left(
-I+D\Delta t L
+\mathbf{T}^{n+1} = \left( I+D\Delta t L
 \right)
 \mathbf{T}^{n}.
 $$
@@ -116,8 +93,7 @@ $$
 The code uses a safety factor:
 
 $$
-\Delta t
-=
+\Delta t =
 0.98
 \frac{\Delta x^2}{2D}.
 $$
@@ -125,8 +101,7 @@ $$
 When $D$ depends on position, the maximum value of the diffusion coefficient controls the stability limit:
 
 $$
-\Delta t
-=
+\Delta t =
 0.98
 \frac{\Delta x^2}{2\max(D(x))}.
 $$
@@ -155,16 +130,9 @@ $$
 The difference matters because:
 
 $$
-\frac{\partial}{\partial x}
-\left(
+\frac{\partial}{\partial x} \left(
 D(x)\frac{\partial T}{\partial x}
-\right)
-=
-D(x)
-\frac{\partial^2 T}{\partial x^2}
-+
-\frac{dD}{dx}
-\frac{\partial T}{\partial x}.
+\right) = D(x) \frac{\partial^2 T}{\partial x^2} + \frac{dD}{dx} \frac{\partial T}{\partial x}.
 $$
 
 The first attempt is therefore useful as a diagnostic comparison, but the corrected conservative discretization is physically preferable.
@@ -176,16 +144,13 @@ The first attempt is therefore useful as a diagnostic comparison, but the correc
 The conservative discretization computes diffusion at interfaces:
 
 $$
-D_{j+1/2}
-=
-\frac{D_j+D_{j+1}}{2}.
+D_{j+1/2} = \frac{D_j+D_{j+1}}{2}.
 $$
 
 The discrete operator is:
 
 $$
-\begin{aligned}
-\left(
+\begin{aligned} \left(
 \nabla\cdot D\nabla T
 \right)_j
 &\approx
@@ -193,9 +158,7 @@ $$
 \left[
 D_{j+1/2}
 \left(
-T_{j+1}-T_j
-\right)
--
+T_{j+1}-T_j \right) -
 D_{j-1/2}
 \left(
 T_j-T_{j-1}
@@ -218,8 +181,7 @@ $$
 \left(
 I-\frac{\Delta t}{2}A
 \right)
-\mathbf{T}^{n+1}
-=
+\mathbf{T}^{n+1} =
 \left(
 I+\frac{\Delta t}{2}A
 \right)
@@ -237,24 +199,21 @@ For variable diffusion, $A$ is the conservative variable-diffusion operator.
 The code constructs two sparse matrices:
 
 $$
-M_{\mathrm{left}}
-=
+M_{\mathrm{left}} =
 I-\frac{\Delta t}{2}A,
 $$
 
 and
 
 $$
-M_{\mathrm{right}}
-=
+M_{\mathrm{right}} =
 I+\frac{\Delta t}{2}A.
 $$
 
 At each timestep, it computes:
 
 $$
-\mathbf{b}
-=
+\mathbf{b} =
 M_{\mathrm{right}}
 \mathbf{T}^{n},
 $$
@@ -263,8 +222,7 @@ and solves:
 
 $$
 M_{\mathrm{left}}
-\mathbf{T}^{n+1}
-=
+\mathbf{T}^{n+1} =
 \mathbf{b}.
 $$
 
@@ -290,8 +248,7 @@ The repository studies the dependence of the numerical error on $\Delta t$.
 The error measures include maximum error and mean error:
 
 $$
-E_{\max}
-=
+E_{\max} =
 \max_j
 \left|
 T_j^{\mathrm{num}}
@@ -301,13 +258,11 @@ T_j^{\mathrm{ref}}
 $$
 
 $$
-E_{\mathrm{mean}}
-=
+E_{\mathrm{mean}} =
 \frac{1}{N}
 \sum_j
 \left|
-T_j^{\mathrm{num}}
--
+T_j^{\mathrm{num}} -
 T_j^{\mathrm{ref}}
 \right|.
 $$
