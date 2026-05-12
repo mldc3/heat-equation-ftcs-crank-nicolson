@@ -21,8 +21,7 @@ This behaviour is very different from hyperbolic equations such as the wave equa
 For constant diffusion coefficient, the one-dimensional heat equation is:
 
 $$
-\frac{\partial T}{\partial t}
-=
+\frac{\partial T}{\partial t} =
 D
 \frac{\partial^2 T}{\partial x^2}.
 $$
@@ -44,11 +43,8 @@ The heat equation can be understood from two physical principles: local conserva
 A local conservation law states that the amount of heat inside a small interval can only change because heat flows through the boundaries of that interval. In one dimension this can be written as:
 
 $$
-\frac{\partial T}{\partial t}
-+
-\frac{\partial J}{\partial x}
-=
-0,
+\frac{\partial T}{\partial t} +
+\frac{\partial J}{\partial x} = 0,
 $$
 
 where $J(x,t)$ is the heat flux.
@@ -64,8 +60,7 @@ The minus sign is physically important. If temperature increases with $x$, then 
 Substituting Fourier's law into the conservation equation gives:
 
 $$
-\frac{\partial T}{\partial t}
-=
+\frac{\partial T}{\partial t} =
 \frac{\partial}{\partial x}
 \left(
 D\frac{\partial T}{\partial x}
@@ -75,8 +70,7 @@ $$
 If $D$ is constant, then $D$ can be taken outside the derivative:
 
 $$
-\frac{\partial T}{\partial t}
-=
+\frac{\partial T}{\partial t} =
 D
 \frac{\partial^2 T}{\partial x^2}.
 $$
@@ -90,8 +84,7 @@ This derivation is crucial because it shows that the physically fundamental form
 When $D$ is constant, the heat equation is:
 
 $$
-\frac{\partial T}{\partial t}
-=
+\frac{\partial T}{\partial t} =
 D
 \frac{\partial^2 T}{\partial x^2}.
 $$
@@ -101,8 +94,7 @@ This is the simplest model. Every point in the material conducts heat equally. T
 However, real materials may not be homogeneous. The thermal diffusivity may depend on position. In that case, the diffusion coefficient is written as $D(x)$, and the correct equation is:
 
 $$
-\frac{\partial T}{\partial t}
-=
+\frac{\partial T}{\partial t} =
 \frac{\partial}{\partial x}
 \left(
 D(x)
@@ -113,8 +105,7 @@ $$
 This is not the same as simply writing:
 
 $$
-\frac{\partial T}{\partial t}
-=
+\frac{\partial T}{\partial t} =
 D(x)
 \frac{\partial^2 T}{\partial x^2}.
 $$
@@ -130,8 +121,7 @@ D(x)
 \right)
 &=
 D(x)
-\frac{\partial^2 T}{\partial x^2}
-+
+\frac{\partial^2 T}{\partial x^2} +
 \frac{dD}{dx}
 \frac{\partial T}{\partial x}.
 \end{aligned}
@@ -198,10 +188,8 @@ The second derivative is approximated using the centered finite-difference stenc
 $$
 \frac{\partial^2 T}{\partial x^2}
 \bigg|_{x_j}
-\approx
-\frac{
-T_{j+1}^n
--
+\approx \frac{
+T_{j+1}^n -
 2T_j^n
 +
 T_{j-1}^n
@@ -244,8 +232,7 @@ $$
 \frac{\partial^2 T}{\partial x^2}
 \approx
 \frac{
-T_{j+1}^n
--
+T_{j+1}^n -
 2T_j^n
 +
 T_{j-1}^n
@@ -255,12 +242,10 @@ $$
 Substituting into the heat equation gives:
 
 $$
-\frac{T_j^{n+1}-T_j^n}{\Delta t}
-=
+\frac{T_j^{n+1}-T_j^n}{\Delta t} =
 D
 \frac{
-T_{j+1}^n
--
+T_{j+1}^n -
 2T_j^n
 +
 T_{j-1}^n
@@ -271,14 +256,11 @@ Solving for the new temperature gives:
 
 $$
 \begin{aligned}
-T_j^{n+1}
-&=
-T_j^n
-+
+T_j^{n+1} &=
+T_j^n +
 r
 \left(
-T_{j+1}^n
--
+T_{j+1}^n -
 2T_j^n
 +
 T_{j-1}^n
@@ -351,10 +333,7 @@ $$
 For FTCS applied to the heat equation, substitution gives:
 
 $$
-Q
-=
-1
--
+Q = 1 -
 4r
 \sin^2
 \left(
@@ -373,11 +352,7 @@ This analysis explains why numerical instability often appears as point-to-point
 For Crank-Nicolson, the amplification factor has the form:
 
 $$
-Q
-=
-\frac{
-1
--
+Q = \frac{ 1 -
 2r
 \sin^2
 \left(
@@ -405,8 +380,7 @@ Crank-Nicolson is obtained by averaging the diffusion operator between the old a
 For constant diffusion:
 
 $$
-\frac{T_j^{n+1}-T_j^n}{\Delta t}
-=
+\frac{T_j^{n+1}-T_j^n}{\Delta t} =
 \frac{D}{2}
 \left[
 \left(
@@ -425,8 +399,7 @@ $$
 \left(
 I-\frac{D\Delta t}{2}L
 \right)
-\mathbf{T}^{n+1}
-=
+\mathbf{T}^{n+1} =
 \left(
 I+\frac{D\Delta t}{2}L
 \right)
@@ -458,8 +431,7 @@ This is why the practice includes both runtime and error comparisons.
 For spatially variable diffusion, the physically correct equation is:
 
 $$
-\frac{\partial T}{\partial t}
-=
+\frac{\partial T}{\partial t} =
 \frac{\partial}{\partial x}
 \left(
 D(x)
@@ -470,17 +442,14 @@ $$
 The conservative finite-difference approach discretizes heat fluxes at cell interfaces. Define:
 
 $$
-D_{j+1/2}
-=
+D_{j+1/2} =
 \frac{D_j+D_{j+1}}{2}.
 $$
 
 The flux through the interface between $j$ and $j+1$ is approximated by:
 
 $$
-J_{j+1/2}
-=
--
+J_{j+1/2} = -
 D_{j+1/2}
 \frac{T_{j+1}-T_j}{\Delta x}.
 $$
@@ -504,8 +473,7 @@ $$
 D_{j+1/2}
 \left(
 T_{j+1}-T_j
-\right)
--
+\right) -
 D_{j-1/2}
 \left(
 T_j-T_{j-1}
@@ -531,8 +499,7 @@ E_{\max}
 =
 \max_j
 \left|
-T_j^{\mathrm{num}}
--
+T_j^{\mathrm{num}} -
 T_j^{\mathrm{ref}}
 \right|.
 $$
@@ -540,13 +507,11 @@ $$
 The mean error is:
 
 $$
-E_{\mathrm{mean}}
-=
+E_{\mathrm{mean}} =
 \frac{1}{N}
 \sum_j
 \left|
-T_j^{\mathrm{num}}
--
+T_j^{\mathrm{num}} -
 T_j^{\mathrm{ref}}
 \right|.
 $$
@@ -562,8 +527,7 @@ Runtime analysis connects numerical methods to practical computation.
 FTCS has low cost per timestep:
 
 $$
-\mathbf{T}^{n+1}
-=
+\mathbf{T}^{n+1} =
 \left(
 I+D\Delta t L
 \right)
@@ -576,8 +540,7 @@ Crank-Nicolson requires solving:
 
 $$
 M_{\mathrm{left}}
-\mathbf{T}^{n+1}
-=
+\mathbf{T}^{n+1} =
 \mathbf{b}.
 $$
 
