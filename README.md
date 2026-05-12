@@ -19,8 +19,7 @@ The project is designed to show the full computational workflow: start from the 
 For a constant diffusion coefficient, the one-dimensional heat equation is:
 
 $$
-\frac{\partial T}{\partial t}
-=
+\frac{\partial T}{\partial t}=
 D
 \frac{\partial^2 T}{\partial x^2}.
 $$
@@ -28,8 +27,7 @@ $$
 For spatially variable diffusion, the physically conservative form is:
 
 $$
-\frac{\partial T}{\partial t}
-=
+\frac{\partial T}{\partial t}=
 \frac{\partial}{\partial x}
 \left(
 D(x)
@@ -80,8 +78,7 @@ $$
 For variable diffusion, the largest value of $D(x)$ controls the most restrictive stability condition:
 
 $$
-\Delta t
-\leq
+\Delta t \leq
 \frac{\Delta x^2}{2\max(D(x))}.
 $$
 
