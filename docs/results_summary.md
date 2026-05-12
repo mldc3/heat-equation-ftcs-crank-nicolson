@@ -18,12 +18,10 @@ $$
 \begin{aligned}
 T_j^{n+1}
 &=
-T_j^n
-+
+T_j^n +
 \frac{D\Delta t}{\Delta x^2}
 \left(
-T_{j+1}^n
--
+T_{j+1}^n -
 2T_j^n
 +
 T_{j-1}^n
@@ -55,8 +53,7 @@ $$
 \left(
 I-\frac{D\Delta t}{2}L
 \right)
-\mathbf{T}^{n+1}
-=
+\mathbf{T}^{n+1} =
 \left(
 I+\frac{D\Delta t}{2}L
 \right)
@@ -86,8 +83,7 @@ $$
 However, the physically correct equation for variable diffusion is:
 
 $$
-\frac{\partial T}{\partial t}
-=
+\frac{\partial T}{\partial t} =
 \frac{\partial}{\partial x}
 \left(
 D(x)
@@ -110,8 +106,7 @@ This figure shows the corrected FTCS treatment of spatially variable diffusion u
 The correct continuous equation is:
 
 $$
-\frac{\partial T}{\partial t}
-=
+\frac{\partial T}{\partial t} =
 \frac{\partial}{\partial x}
 \left(
 D(x)
@@ -122,22 +117,19 @@ $$
 A conservative discretization evaluates diffusion at interfaces between grid cells:
 
 $$
-D_{j+1/2}
-=
+D_{j+1/2} =
 \frac{D_j+D_{j+1}}{2}.
 $$
 
 The discrete operator is:
 
 $$
-\begin{aligned}
-\frac{1}{\Delta x^2}
+\begin{aligned} \frac{1}{\Delta x^2}
 \left[
 D_{j+1/2}
 \left(
 T_{j+1}-T_j
-\right)
--
+\right) -
 D_{j-1/2}
 \left(
 T_j-T_{j-1}
@@ -196,8 +188,7 @@ Crank-Nicolson requires solving a linear system at every timestep:
 
 $$
 M_{\mathrm{left}}
-\mathbf{T}^{n+1}
-=
+\mathbf{T}^{n+1} =
 \mathbf{b}.
 $$
 
